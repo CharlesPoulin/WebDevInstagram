@@ -1,130 +1,62 @@
-# https://taskfile.dev
-# Cross-platform task runner - works on Windows, Mac, and Linux
-
 version: '3'
-
-vars:
-  PYTHON_VERSION: "3.13"
 
 tasks:
   default:
-    desc: Show available tasks
     cmds:
       - task --list
 
   install:
-    desc: Install dependencies using uv
+    desc: Install dependencies
+    dir: ugram
     cmds:
       - uv sync
 
+  start-db:
+    desc: Start the database container
+    dir: ugram
+    cmds:
+      - docker-compose up -d db
+
+  start-backend:
+    desc: Start the backend server (and dependencies)
+    dir: ugram
+    deps: [start-db]
+    cmds:
+      - uv run uvicorn src.main:app --reload --port 8000
+
   start:
-    desc: Run the CLI application (alias for run)
-    deps: [run]
-
-  run:
-    desc: Run the CLI application
-    cmds:
-      - uv run defaultpython
-
-  run-api:
-    desc: Run the FastAPI app with hot reload
-    cmds:
-      - uv run uvicorn defaultpython.api:app --reload
+    desc: Start the application
+    deps: [start-backend]
 
   test:
-    desc: Run tests with coverage
+    desc: Run tests
+    dir: ugram
     cmds:
-      - uv run python -m pytest --cov --cov-report=term-missing
+      - uv run python -m pytest
 
-  test-watch:
-    desc: Run tests in watch mode
+  test-docker:
+    desc: Run tests inside Docker container
+    dir: ugram
     cmds:
-      - uv run python -m pytest --watch
+      - docker compose run --rm api uv run pytest
 
   lint:
-    desc: Run ruff linting checks
+    desc: Run ruff linting
+    dir: ugram
     cmds:
-      - uv run ruff check src tests
-
-  lint-fix:
-    desc: Run ruff and auto-fix issues
-    cmds:
-      - uv run ruff check src tests --fix
+      - uv run ruff check .
 
   format:
     desc: Format code with ruff
+    dir: ugram
     cmds:
-      - uv run ruff format src tests
-
-  format-check:
-    desc: Check formatting without making changes
-    cmds:
-      - uv run ruff format src tests --check
-
-  type-check:
-    desc: Run mypy type checks
-    cmds:
-      - uv run python -m mypy src tests
-
-  security:
-    desc: Run all security checks (bandit, pip-audit)
-    cmds:
-      - uv run bandit -r src
-      - task: security-audit
+      - uv run ruff format .
 
   check:
-    desc: Run all checks (lint, format, type-check, security, test)
+    desc: Run all checks (format-check, lint, test) for CI
+    dir: ugram
     cmds:
-      - task: lint
-      - task: format-check
-      - task: type-check
-      - task: security
+      - uv run ruff format --check .
+      - uv run ruff check .
       - task: test
 
-  release:
-    desc: Bump version and generate changelog locally
-    cmds:
-      - uv run cz bump --changelog
-
-  clean:
-    desc: Remove caches and build artifacts
-    cmds:
-      - cmd: rm -rf .venv .pytest_cache .ruff_cache .mypy_cache .coverage htmlcov dist build
-        platforms: [linux, darwin]
-      - cmd: if exist .venv rmdir /s /q .venv & if exist .pytest_cache rmdir /s /q .pytest_cache & if exist .ruff_cache rmdir /s /q .ruff_cache & if exist .mypy_cache rmdir /s /q .mypy_cache & if exist .coverage del /f .coverage & if exist htmlcov rmdir /s /q htmlcov & if exist dist rmdir /s /q dist & if exist build rmdir /s /q build
-        platforms: [windows]
-
-  docker-build:
-    desc: Build Docker image
-    cmds:
-      - docker build -t defaultpython .
-
-  docker-run:
-    desc: Run Docker container
-    cmds:
-      - docker run --rm defaultpython
-
-  docker-up:
-    desc: Start services with docker compose
-    cmds:
-      - docker compose up --build
-
-  docker-down:
-    desc: Stop services
-    cmds:
-      - docker compose down
-
-  security-audit:
-    desc: Check for known security vulnerabilities in dependencies
-    cmds:
-      - uv run pip-audit
-
-  pre-commit:
-    desc: Run pre-commit hooks on all files
-    cmds:
-      - uv run pre-commit run --all-files
-
-  pre-commit-install:
-    desc: Install pre-commit hooks
-    cmds:
-      - uv run pre-commit install
