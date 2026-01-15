@@ -1,31 +1,11 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
-name = "defaultpython"
-version = "0.1.2"
-description = "Add your description here"
-readme = "README.md"
+name = "webdevinstagram"
+version = "0.1.0"
+description = "Web Development Instagram Project Workspace"
 requires-python = ">=3.13"
-dependencies = [
-    "fastapi>=0.128.0",
-    "pydantic-settings>=2.12.0",
-    "python-dotenv>=1.2.1",
-    "uvicorn>=0.40.0",
-]
 
-[project.scripts]
-defaultpython = "defaultpython.main:main"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/defaultpython"]
-
-[tool.hatch.build.targets.wheel.force-include]
-"src/defaultpython/py.typed" = "defaultpython/py.typed"
-
-[tool.hatch.build.targets.sdist]
-include = ["src/defaultpython"]
+[tool.uv.workspace]
+members = ["ugram"]
 
 [tool.coverage.run]
 source = ["src"]

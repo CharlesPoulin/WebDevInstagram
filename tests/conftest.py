@@ -3,7 +3,7 @@ from collections.abc import Generator
 import pytest
 from fastapi.testclient import TestClient
 
-from defaultpython.api import app
+from ugram.src.main import app
 
 
 @pytest.fixture
