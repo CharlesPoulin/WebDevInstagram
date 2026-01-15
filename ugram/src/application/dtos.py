@@ -7,7 +7,7 @@ and provide a stable contract for API consumers.
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class UserProfileResponse(BaseModel):
@@ -25,11 +25,9 @@ class UserProfileResponse(BaseModel):
     profile_photo_url: str | None
     registration_date: datetime
 
-    class Config:
-        """Pydantic configuration."""
-
-        from_attributes = True  # Allow creating from ORM models
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,  # Allow creating from ORM models
+        json_schema_extra={
             "example": {
                 "id": "123e4567-e89b-12d3-a456-426614174000",
                 "username": "johndoe",
@@ -40,7 +38,8 @@ class UserProfileResponse(BaseModel):
                 "profile_photo_url": "https://example.com/photos/john.jpg",
                 "registration_date": "2026-01-14T10:30:00Z",
             }
-        }
+        },
+    )
 
 
 class UpdateUserProfileRequest(BaseModel):
@@ -63,10 +62,8 @@ class UpdateUserProfileRequest(BaseModel):
             pass
         return v
 
-    class Config:
-        """Pydantic configuration."""
-
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "first_name": "John",
                 "last_name": "Doe",
@@ -74,6 +71,7 @@ class UpdateUserProfileRequest(BaseModel):
                 "phone_number": "+15551234567",
             }
         }
+    )
 
 
 class CreateUserRequest(BaseModel):
@@ -86,10 +84,8 @@ class CreateUserRequest(BaseModel):
     phone_number: str | None = Field(None, pattern=r"^\+?[1-9]\d{1,14}$")
     profile_photo_url: str | None = Field(None, max_length=500)
 
-    class Config:
-        """Pydantic configuration."""
-
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "username": "johndoe",
                 "email": "[email protected]",
@@ -98,6 +94,7 @@ class CreateUserRequest(BaseModel):
                 "phone_number": "+15551234567",
             }
         }
+    )
 
 
 class UserListResponse(BaseModel):
@@ -108,10 +105,8 @@ class UserListResponse(BaseModel):
     limit: int
     offset: int
 
-    class Config:
-        """Pydantic configuration."""
-
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "users": [],
                 "total": 100,
@@ -119,3 +114,4 @@ class UserListResponse(BaseModel):
                 "offset": 0,
             }
         }
+    )
