@@ -1,7 +1,6 @@
-"""Dependency injection container for FastAPI.
+"""FastAPI dependency injection wiring.
 
-This module wires together infrastructure adapters and domain services,
-following the dependency inversion principle.
+Connects infrastructure adapters to domain services via dependency inversion.
 """
 
 from typing import Annotated
@@ -19,38 +18,29 @@ from ..domain.social.services import SocialService
 from ..domain.time_provider import ITimeProvider
 from ..domain.users.services import UserService
 
+# Type alias for database session injection
+DbSession = Annotated[Session, Depends(get_db)]
+
 
 def get_time_provider() -> ITimeProvider:
-    """Dependency provider for TimeProvider.
-
-    Returns:
-        SystemTimeProvider instance for production use
-    """
+    """Production time provider."""
     return SystemTimeProvider()
 
 
-def get_user_service(
-    db: Annotated[Session, Depends(get_db)],
-    time_provider: Annotated[ITimeProvider, Depends(get_time_provider)],
-) -> UserService:
-    """Dependency provider for UserService.
+# Type alias for time provider injection (defined after get_time_provider)
+TimeProviderDep = Annotated[ITimeProvider, Depends(get_time_provider)]
 
-    Args:
-        db: Database session injected by FastAPI
-        time_provider: Time provider injected by FastAPI
 
-    Returns:
-        Configured UserService with repository and time provider
-    """
-    user_repo = SQLAlchemyUserRepository(db)
-    return UserService(user_repo, time_provider)
+def get_user_service(db: DbSession, time_provider: TimeProviderDep) -> UserService:
+    """Wire UserService with SQLAlchemy repository."""
+    return UserService(SQLAlchemyUserRepository(db), time_provider)
 
 
 def get_image_service() -> ImageService:
-    """Dependency provider for ImageService."""
+    """Placeholder - not yet implemented."""
     raise NotImplementedError
 
 
 def get_social_service() -> SocialService:
-    """Dependency provider for SocialService."""
+    """Placeholder - not yet implemented."""
     raise NotImplementedError

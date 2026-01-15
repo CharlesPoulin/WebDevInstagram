@@ -1,8 +1,4 @@
-"""Data Transfer Objects for crossing architecture boundaries.
-
-DTOs help decouple the domain layer from external concerns (like HTTP APIs)
-and provide a stable contract for API consumers.
-"""
+"""API request/response DTOs for HTTP boundary."""
 
 from datetime import datetime
 from uuid import UUID
@@ -11,10 +7,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class UserProfileResponse(BaseModel):
-    """Response DTO for user profile data.
-
-    Used when returning user information from API endpoints.
-    """
+    """User profile data returned by API."""
 
     id: UUID
     username: str
@@ -43,10 +36,7 @@ class UserProfileResponse(BaseModel):
 
 
 class UpdateUserProfileRequest(BaseModel):
-    """Request DTO for updating user profile.
-
-    All fields are optional - only provided fields will be updated.
-    """
+    """Partial update - only provided fields are changed."""
 
     first_name: str | None = Field(None, min_length=1, max_length=100)
     last_name: str | None = Field(None, min_length=1, max_length=100)

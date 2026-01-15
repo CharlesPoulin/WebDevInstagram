@@ -1,9 +1,10 @@
-"""SQLAlchemy implementation of User repository."""
+"""SQLAlchemy implementation of the User repository."""
 
 from uuid import UUID
 
-from sqlalchemy import select  # type: ignore
-from sqlalchemy.orm import Session  # type: ignore
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from ....domain.users.entities import User
 from ....domain.users.repositories import IUserRepository
@@ -11,78 +12,59 @@ from .models import UserORM
 
 
 class SQLAlchemyUserRepository(IUserRepository):
-    """Concrete implementation of IUserRepository using SQLAlchemy.
-
-    This adapter translates between domain entities and database models.
-    """
+    """SQLAlchemy adapter for user persistence."""
 
     def __init__(self, session: Session) -> None:
-        self.session = session
+        self._session = session
 
     def get_by_id(self, user_id: UUID) -> User | None:
-        """Get user by ID from database."""
-        stmt = select(UserORM).where(UserORM.id == user_id)
-        user_orm = self.session.scalars(stmt).first()
-        return self._to_entity(user_orm) if user_orm else None
+        return self._get_one_by(UserORM.id, user_id)
 
     def get_by_username(self, username: str) -> User | None:
-        """Get user by username from database."""
-        stmt = select(UserORM).where(UserORM.username == username)
-        user_orm = self.session.scalars(stmt).first()
-        return self._to_entity(user_orm) if user_orm else None
+        return self._get_one_by(UserORM.username, username)
 
     def get_by_email(self, email: str) -> User | None:
-        """Get user by email from database."""
-        stmt = select(UserORM).where(UserORM.email == email)
-        user_orm = self.session.scalars(stmt).first()
-        return self._to_entity(user_orm) if user_orm else None
+        return self._get_one_by(UserORM.email, email)
 
     def save(self, user: User) -> User:
-        """Save new user to database."""
-        user_orm = self._to_orm(user)
-        self.session.add(user_orm)
-        self.session.flush()  # Flush to get generated fields
-        return self._to_entity(user_orm)
+        orm = self._to_orm(user)
+        self._session.add(orm)
+        self._session.flush()
+        return self._to_entity(orm)
 
     def update(self, user: User) -> User:
-        """Update existing user in database."""
-        stmt = select(UserORM).where(UserORM.id == user.id)
-        user_orm = self.session.scalars(stmt).first()
+        orm = self._session.scalars(select(UserORM).where(UserORM.id == user.id)).first()
 
-        if not user_orm:
+        if not orm:
             raise ValueError(f"User with ID {user.id} not found")
 
-        # Update fields
-        user_orm.username = user.username
-        user_orm.email = user.email
-        user_orm.first_name = user.first_name
-        user_orm.last_name = user.last_name
-        user_orm.phone_number = user.phone_number
-        user_orm.profile_photo_url = user.profile_photo_url
-        # Note: registration_date should not be updated
+        orm.username = user.username
+        orm.email = user.email
+        orm.first_name = user.first_name
+        orm.last_name = user.last_name
+        orm.phone_number = user.phone_number
+        orm.profile_photo_url = user.profile_photo_url
+        # registration_date is immutable
 
-        self.session.flush()
-        return self._to_entity(user_orm)
+        self._session.flush()
+        return self._to_entity(orm)
 
     def list_all(self, limit: int = 100, offset: int = 0) -> list[User]:
-        """List all users with pagination."""
-        stmt = select(UserORM).limit(limit).offset(offset).order_by(UserORM.username)
-        user_orms = self.session.scalars(stmt).all()
-        return [self._to_entity(orm) for orm in user_orms]
+        stmt = select(UserORM).order_by(UserORM.username).limit(limit).offset(offset)
+        return [self._to_entity(orm) for orm in self._session.scalars(stmt)]
 
     def count(self) -> int:
-        """Get total count of users."""
-        from sqlalchemy import func
+        return self._session.scalar(select(func.count()).select_from(UserORM)) or 0
 
-        stmt = select(func.count()).select_from(UserORM)
-        return self.session.scalar(stmt) or 0
+    # --- Private helpers ---
+
+    def _get_one_by[T](self, column: InstrumentedAttribute[T], value: T) -> User | None:
+        """Fetch single user by column match."""
+        orm = self._session.scalars(select(UserORM).where(column == value)).first()
+        return self._to_entity(orm) if orm else None
 
     def _to_entity(self, orm: UserORM) -> User:
-        """Convert ORM model to domain entity.
-
-        This is the anti-corruption layer preventing database concerns
-        from leaking into the domain.
-        """
+        """Map ORM to domain entity (anti-corruption layer)."""
         return User(
             id=orm.id,
             username=orm.username,
@@ -95,7 +77,7 @@ class SQLAlchemyUserRepository(IUserRepository):
         )
 
     def _to_orm(self, entity: User) -> UserORM:
-        """Convert domain entity to ORM model."""
+        """Map domain entity to ORM."""
         return UserORM(
             id=entity.id,
             username=entity.username,

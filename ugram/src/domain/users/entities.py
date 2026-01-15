@@ -11,11 +11,7 @@ from ..time_provider import ITimeProvider
 
 @dataclass
 class User:
-    """User aggregate root containing identity and profile information.
-
-    This entity represents a user in the system with all their profile data.
-    It enforces business rules and invariants through validation methods.
-    """
+    """User aggregate root with identity, profile data, and validation rules."""
 
     id: UUID
     username: str
@@ -32,7 +28,7 @@ class User:
     _PHONE_REGEX = re.compile(r"^\+?[1-9]\d{1,14}$")
 
     def __post_init__(self) -> None:
-        """Validate invariants after initialization."""
+        """Enforce invariants on construction."""
         self._validate_username()
         self._validate_email()
         if self.phone_number:
@@ -49,20 +45,7 @@ class User:
         phone_number: str | None = None,
         profile_photo_url: str | None = None,
     ) -> Self:
-        """Factory method to create a new user with generated ID and registration date.
-
-        Args:
-            username: Unique username
-            email: User's email address
-            first_name: User's first name
-            last_name: User's last name
-            time_provider: Provider for current time (injected dependency)
-            phone_number: Optional phone number
-            profile_photo_url: Optional profile photo URL
-
-        Returns:
-            New User instance with generated ID and current registration date
-        """
+        """Factory: creates user with generated UUID and current timestamp."""
         return cls(
             id=uuid4(),
             username=username,
@@ -81,17 +64,7 @@ class User:
         email: str | None = None,
         phone_number: str | None = None,
     ) -> None:
-        """Update user profile fields with validation.
-
-        Args:
-            first_name: New first name
-            last_name: New last name
-            email: New email address
-            phone_number: New phone number (can be None to remove)
-
-        Raises:
-            ValueError: If any validation fails
-        """
+        """Partial update - only non-None fields are changed."""
         if first_name is not None:
             self.first_name = first_name
 
