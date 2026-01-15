@@ -3,6 +3,7 @@
 This module provides RESTful endpoints for user profile management.
 """
 
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -43,11 +44,11 @@ def _user_to_response(user: User) -> UserProfileResponse:
     response_model=UserProfileResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new user",
-    description="Create a new user with profile information. Username and email must be unique.",
+    description=("Create a new user with profile information. Username and email must be unique."),
 )
 def create_user(
     request: CreateUserRequest,
-    service: UserService = Depends(get_user_service),
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserProfileResponse:
     """Create a new user.
 
@@ -59,7 +60,7 @@ def create_user(
         Created user profile
 
     Raises:
-        HTTPException: 409 if username or email already exists, 400 for validation errors
+        HTTPException: 409 if username or email already exists, 400 for errors
     """
     try:
         user = service.create_user(
@@ -72,21 +73,21 @@ def create_user(
         )
         return _user_to_response(user)
     except UserAlreadyExistsError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
 
 @router.get(
     "",
     response_model=UserListResponse,
     summary="List all users",
-    description="Get a paginated list of all users. Default limit is 20, maximum is 100.",
+    description=("Get a paginated list of all users. Default limit is 20, maximum is 100."),
 )
 def list_users(
+    service: Annotated[UserService, Depends(get_user_service)],
     limit: int = Query(20, ge=1, le=100, description="Number of users to return"),
     offset: int = Query(0, ge=0, description="Number of users to skip"),
-    service: UserService = Depends(get_user_service),
 ) -> UserListResponse:
     """List all users with pagination.
 
@@ -117,7 +118,7 @@ def list_users(
 )
 def get_user(
     user_id: UUID,
-    service: UserService = Depends(get_user_service),
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserProfileResponse:
     """Get a user's profile by their ID.
 
@@ -135,19 +136,19 @@ def get_user(
         user = service.get_user(user_id)
         return _user_to_response(user)
     except UserNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 @router.put(
     "/{user_id}",
     response_model=UserProfileResponse,
     summary="Update user profile",
-    description="Update profile information for a user. Only provided fields will be updated.",
+    description=("Update profile information for a user. Only provided fields will be updated."),
 )
 def update_user_profile(
     user_id: UUID,
     request: UpdateUserProfileRequest,
-    service: UserService = Depends(get_user_service),
+    service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserProfileResponse:
     """Update a user's profile.
 
@@ -173,8 +174,8 @@ def update_user_profile(
         )
         return _user_to_response(user)
     except UserNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
     except UserAlreadyExistsError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(e)) from e
     except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e

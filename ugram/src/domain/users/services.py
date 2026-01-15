@@ -26,9 +26,7 @@ class UserService:
     within a single entity and coordinates repository operations.
     """
 
-    def __init__(
-        self, user_repo: IUserRepository, time_provider: ITimeProvider
-    ) -> None:
+    def __init__(self, user_repo: IUserRepository, time_provider: ITimeProvider) -> None:
         self.user_repo = user_repo
         self.time_provider = time_provider
 

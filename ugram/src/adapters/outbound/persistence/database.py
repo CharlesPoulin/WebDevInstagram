@@ -11,9 +11,8 @@ from fastapi import Depends
 from sqlalchemy import create_engine  # type: ignore
 from sqlalchemy.orm import Session, sessionmaker  # type: ignore
 
-from .models import Base
-
 from ....application.config import settings
+from .models import Base
 
 # Database URL
 DATABASE_URL = settings.DATABASE_URL
@@ -36,7 +35,7 @@ def create_tables() -> None:
     Base.metadata.create_all(bind=engine)
 
 
-def get_db() -> Generator[Session, None, None]:
+def get_db() -> Generator[Session]:
     """FastAPI dependency for database sessions.
 
     Provides a database session that is automatically closed after the request.

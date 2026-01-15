@@ -7,7 +7,7 @@ from .adapters.outbound.persistence.database import create_tables
 
 app = FastAPI(
     title="uGram API",
-    description="Instagram-like application backend with user profiles, images, and social features",
+    description=("Instagram-like application backend with user profiles, images, and social features"),
     version="1.0.0",
 )
 

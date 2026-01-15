@@ -28,6 +28,4 @@ class UserORM(Base):
     last_name: Mapped[str] = mapped_column(String(100))
     phone_number: Mapped[str | None] = mapped_column(String(20), nullable=True)
     profile_photo_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    registration_date: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=datetime.utcnow
-    )
+    registration_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)

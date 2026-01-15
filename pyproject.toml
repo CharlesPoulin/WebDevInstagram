@@ -25,7 +25,7 @@ update_changelog_on_bump = true
 major_version_zero = true
 
 [tool.ruff]
-line-length = 88
+line-length = 120
 target-version = "py313"
 lint.select = ["E", "F", "I", "N", "UP", "B", "A", "C4", "SIM", "ARG", "ANN"]
 

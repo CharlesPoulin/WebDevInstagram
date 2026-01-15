@@ -9,13 +9,11 @@ from collections.abc import Generator
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-
-from src.main import app
-from src.adapters.outbound.persistence.models import Base
+from sqlalchemy.orm import Session, sessionmaker
 from src.adapters.outbound.persistence.database import get_db
+from src.adapters.outbound.persistence.models import Base
 from src.application.config import settings
-
+from src.main import app
 
 # Use the same PostgreSQL database from settings for testing
 TEST_DATABASE_URL = settings.DATABASE_URL
@@ -24,7 +22,7 @@ test_engine = create_engine(TEST_DATABASE_URL, echo=False)
 TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
 
-def override_get_db() -> Generator[Session, None, None]:
+def override_get_db() -> Generator[Session]:
     """Override database dependency for testing."""
     db = TestSessionLocal()
     try:
@@ -38,7 +36,7 @@ def override_get_db() -> Generator[Session, None, None]:
 
 
 @pytest.fixture(scope="function", autouse=True)
-def setup_database() -> Generator[None, None, None]:
+def setup_database() -> Generator[None]:
     """Create fresh database tables before each test and drop after."""
     # Create all tables
     Base.metadata.create_all(bind=test_engine)
@@ -48,7 +46,7 @@ def setup_database() -> Generator[None, None, None]:
 
 
 @pytest.fixture
-def client() -> Generator[TestClient, None, None]:
+def client() -> Generator[TestClient]:
     """Provide a test client with database dependency overridden."""
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as c:

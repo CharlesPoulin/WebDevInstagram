@@ -134,9 +134,7 @@ class TestCreateUser:
 class TestGetUser:
     """Tests for retrieving a user."""
 
-    def test_retrieves_existing_user(
-        self, api: UserAPIClient, created_user: dict
-    ) -> None:
+    def test_retrieves_existing_user(self, api: UserAPIClient, created_user: dict) -> None:
         """Getting a user by ID returns correct data."""
         status, data = api.get(created_user["id"])
 
@@ -191,9 +189,7 @@ class TestListUsers:
 class TestUpdateUser:
     """Tests for updating user profile."""
 
-    def test_updates_user_profile(
-        self, api: UserAPIClient, created_user: dict
-    ) -> None:
+    def test_updates_user_profile(self, api: UserAPIClient, created_user: dict) -> None:
         """Updating a user modifies the specified fields."""
         updates = {
             "first_name": "Updated",

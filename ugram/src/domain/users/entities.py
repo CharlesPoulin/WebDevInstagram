@@ -1,7 +1,7 @@
 """User domain entities with rich business logic and validation."""
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Self
 from uuid import UUID, uuid4
@@ -124,9 +124,7 @@ class User:
         if len(self.username) > 50:
             raise ValueError("Username must not exceed 50 characters")
         if not re.match(r"^[a-zA-Z0-9_]+$", self.username):
-            raise ValueError(
-                "Username can only contain letters, numbers, and underscores"
-            )
+            raise ValueError("Username can only contain letters, numbers, and underscores")
 
     def _validate_email(self) -> None:
         """Validate email format."""
@@ -140,6 +138,4 @@ class User:
     def _validate_phone_number(self) -> None:
         """Validate phone number format if provided."""
         if self.phone_number and not self._PHONE_REGEX.match(self.phone_number):
-            raise ValueError(
-                "Invalid phone number format. Use international format (e.g., +15551234567)"
-            )
+            raise ValueError("Invalid phone number format. Use international format (e.g., +15551234567)")

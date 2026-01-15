@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends
 
 from ....application.dependencies import get_social_service
@@ -7,6 +9,8 @@ router = APIRouter(prefix="/social", tags=["social"])
 
 
 @router.post("/comment")
-def post_comment(service: SocialService = Depends(get_social_service)) -> None:
+def post_comment(
+    service: Annotated[SocialService, Depends(get_social_service)],
+) -> None:
     # logic for posting comment
     pass

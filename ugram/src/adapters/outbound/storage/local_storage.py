@@ -1,5 +1,5 @@
 class LocalStorage:
-    def __init__(self, base_path: str):
+    def __init__(self, base_path: str) -> None:
         self.base_path = base_path
 
     def save(self, file_name: str, content: bytes) -> str:

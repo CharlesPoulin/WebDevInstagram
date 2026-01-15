@@ -4,18 +4,19 @@ This module wires together infrastructure adapters and domain services,
 following the dependency inversion principle.
 """
 
+from typing import Annotated
+
 from fastapi import Depends
 from sqlalchemy.orm import Session  # type: ignore
-from collections.abc import Generator
 
 from ..adapters.outbound.persistence.database import get_db
 from ..adapters.outbound.persistence.sqlalchemy_user_repository import (
     SQLAlchemyUserRepository,
 )
 from ..adapters.outbound.time_provider import SystemTimeProvider
-from ..domain.time_provider import ITimeProvider
 from ..domain.images.services import ImageService
 from ..domain.social.services import SocialService
+from ..domain.time_provider import ITimeProvider
 from ..domain.users.services import UserService
 
 
@@ -29,8 +30,8 @@ def get_time_provider() -> ITimeProvider:
 
 
 def get_user_service(
-    db: Session = Depends(get_db),
-    time_provider: ITimeProvider = Depends(get_time_provider),
+    db: Annotated[Session, Depends(get_db)],
+    time_provider: Annotated[ITimeProvider, Depends(get_time_provider)],
 ) -> UserService:
     """Dependency provider for UserService.
 
