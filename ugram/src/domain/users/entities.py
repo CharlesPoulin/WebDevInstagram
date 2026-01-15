@@ -6,6 +6,8 @@ from datetime import datetime
 from typing import Self
 from uuid import UUID, uuid4
 
+from ..time_provider import ITimeProvider
+
 
 @dataclass
 class User:
@@ -43,10 +45,24 @@ class User:
         email: str,
         first_name: str,
         last_name: str,
+        time_provider: ITimeProvider,
         phone_number: str | None = None,
         profile_photo_url: str | None = None,
     ) -> Self:
-        """Factory method to create a new user with generated ID and registration date."""
+        """Factory method to create a new user with generated ID and registration date.
+
+        Args:
+            username: Unique username
+            email: User's email address
+            first_name: User's first name
+            last_name: User's last name
+            time_provider: Provider for current time (injected dependency)
+            phone_number: Optional phone number
+            profile_photo_url: Optional profile photo URL
+
+        Returns:
+            New User instance with generated ID and current registration date
+        """
         return cls(
             id=uuid4(),
             username=username,
@@ -55,7 +71,7 @@ class User:
             last_name=last_name,
             phone_number=phone_number,
             profile_photo_url=profile_photo_url,
-            registration_date=datetime.utcnow(),
+            registration_date=time_provider.now(),
         )
 
     def update_profile(

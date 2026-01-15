@@ -2,6 +2,7 @@
 
 from uuid import UUID
 
+from ..time_provider import ITimeProvider
 from .entities import User
 from .repositories import IUserRepository
 
@@ -25,8 +26,11 @@ class UserService:
     within a single entity and coordinates repository operations.
     """
 
-    def __init__(self, user_repo: IUserRepository) -> None:
+    def __init__(
+        self, user_repo: IUserRepository, time_provider: ITimeProvider
+    ) -> None:
         self.user_repo = user_repo
+        self.time_provider = time_provider
 
     def get_user(self, user_id: UUID) -> User:
         """Get a user by ID.
@@ -101,6 +105,7 @@ class UserService:
             email=email,
             first_name=first_name,
             last_name=last_name,
+            time_provider=self.time_provider,
             phone_number=phone_number,
             profile_photo_url=profile_photo_url,
         )
