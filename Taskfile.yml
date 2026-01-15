@@ -1,0 +1,130 @@
+# https://taskfile.dev
+# Cross-platform task runner - works on Windows, Mac, and Linux
+
+version: '3'
+
+vars:
+  PYTHON_VERSION: "3.13"
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  install:
+    desc: Install dependencies using uv
+    cmds:
+      - uv sync
+
+  start:
+    desc: Run the CLI application (alias for run)
+    deps: [run]
+
+  run:
+    desc: Run the CLI application
+    cmds:
+      - uv run defaultpython
+
+  run-api:
+    desc: Run the FastAPI app with hot reload
+    cmds:
+      - uv run uvicorn defaultpython.api:app --reload
+
+  test:
+    desc: Run tests with coverage
+    cmds:
+      - uv run python -m pytest --cov --cov-report=term-missing
+
+  test-watch:
+    desc: Run tests in watch mode
+    cmds:
+      - uv run python -m pytest --watch
+
+  lint:
+    desc: Run ruff linting checks
+    cmds:
+      - uv run ruff check src tests
+
+  lint-fix:
+    desc: Run ruff and auto-fix issues
+    cmds:
+      - uv run ruff check src tests --fix
+
+  format:
+    desc: Format code with ruff
+    cmds:
+      - uv run ruff format src tests
+
+  format-check:
+    desc: Check formatting without making changes
+    cmds:
+      - uv run ruff format src tests --check
+
+  type-check:
+    desc: Run mypy type checks
+    cmds:
+      - uv run python -m mypy src tests
+
+  security:
+    desc: Run all security checks (bandit, pip-audit)
+    cmds:
+      - uv run bandit -r src
+      - task: security-audit
+
+  check:
+    desc: Run all checks (lint, format, type-check, security, test)
+    cmds:
+      - task: lint
+      - task: format-check
+      - task: type-check
+      - task: security
+      - task: test
+
+  release:
+    desc: Bump version and generate changelog locally
+    cmds:
+      - uv run cz bump --changelog
+
+  clean:
+    desc: Remove caches and build artifacts
+    cmds:
+      - cmd: rm -rf .venv .pytest_cache .ruff_cache .mypy_cache .coverage htmlcov dist build
+        platforms: [linux, darwin]
+      - cmd: if exist .venv rmdir /s /q .venv & if exist .pytest_cache rmdir /s /q .pytest_cache & if exist .ruff_cache rmdir /s /q .ruff_cache & if exist .mypy_cache rmdir /s /q .mypy_cache & if exist .coverage del /f .coverage & if exist htmlcov rmdir /s /q htmlcov & if exist dist rmdir /s /q dist & if exist build rmdir /s /q build
+        platforms: [windows]
+
+  docker-build:
+    desc: Build Docker image
+    cmds:
+      - docker build -t defaultpython .
+
+  docker-run:
+    desc: Run Docker container
+    cmds:
+      - docker run --rm defaultpython
+
+  docker-up:
+    desc: Start services with docker compose
+    cmds:
+      - docker compose up --build
+
+  docker-down:
+    desc: Stop services
+    cmds:
+      - docker compose down
+
+  security-audit:
+    desc: Check for known security vulnerabilities in dependencies
+    cmds:
+      - uv run pip-audit
+
+  pre-commit:
+    desc: Run pre-commit hooks on all files
+    cmds:
+      - uv run pre-commit run --all-files
+
+  pre-commit-install:
+    desc: Install pre-commit hooks
+    cmds:
+      - uv run pre-commit install

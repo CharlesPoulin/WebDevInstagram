@@ -1,0 +1,21 @@
+{
+    "python.defaultInterpreterPath": ".venv/Scripts/python.exe",
+    "python.analysis.typeCheckingMode": "strict",
+    "python.analysis.autoImportCompletions": true,
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    "ruff.interpreter": [
+        ".venv/Scripts/python.exe"
+    ],
+    "mypy-type-checker.interpreter": [
+        ".venv/Scripts/python.exe"
+    ],
+    "mypy-type-checker.args": [
+        "--config-file=pyproject.toml"
+    ],
+    "makefile.configureOnOpen": false
+}
