@@ -5,7 +5,7 @@ description = "Web Development Instagram Project Workspace"
 requires-python = ">=3.13"
 
 [tool.uv.workspace]
-members = ["ugram"]
+members = ["backend"]
 
 [tool.coverage.run]
 source = ["src"]

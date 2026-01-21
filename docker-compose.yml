@@ -10,4 +10,4 @@ services:
     # If/when you switch to a web server, uncomment ports:
     # ports:
     #   - "8000:8000"
-    # command: uvicorn defaultpython.main:app --host 0.0.0.0 --port 8000 --reload
+    # command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload

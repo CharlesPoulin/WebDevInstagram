@@ -7,19 +7,19 @@ tasks:
 
   install:
     desc: Install dependencies
-    dir: ugram
+    dir: backend
     cmds:
       - uv sync
 
   start-db:
     desc: Start the database container
-    dir: ugram
+    dir: backend
     cmds:
       - docker-compose up -d db
 
   start-backend:
     desc: Start the backend server (and dependencies)
-    dir: ugram
+    dir: backend
     deps: [start-db]
     cmds:
       - uv run uvicorn src.main:app --reload --port 8000
@@ -30,31 +30,31 @@ tasks:
 
   test:
     desc: Run tests
-    dir: ugram
+    dir: backend
     cmds:
       - uv run python -m pytest
 
   test-docker:
     desc: Run tests inside Docker container
-    dir: ugram
+    dir: backend
     cmds:
       - docker compose run --rm api uv run pytest
 
   lint:
     desc: Run ruff linting
-    dir: ugram
+    dir: backend
     cmds:
       - uv run ruff check .
 
   format:
     desc: Format code with ruff
-    dir: ugram
+    dir: backend
     cmds:
       - uv run ruff format .
 
   check:
     desc: Run all checks (format-check, lint, test) for CI
-    dir: ugram
+    dir: backend
     cmds:
       - uv run ruff format --check .
       - uv run ruff check .

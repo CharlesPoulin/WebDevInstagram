@@ -26,4 +26,4 @@ RUN uv sync --frozen
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Run the application
-CMD ["python", "-m", "defaultpython.main"]
+CMD ["python", "-m", "src.main"]
