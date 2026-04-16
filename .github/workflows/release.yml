@@ -54,7 +54,7 @@ jobs:
 
       - name: Create Release
         if: steps.cz.outcome == 'success'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           body_path: "CHANGELOG.md"
           tag_name: ${{ env.REVISION }}
